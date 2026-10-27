@@ -1,0 +1,52 @@
+appId: com.studiopresence.app
+productName: Studio Presence
+copyright: Copyright © 2026
+asar: true
+npmRebuild: false
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - dist/**/*
+  - package.json
+
+extraResources:
+  - from: ../plugin/dist/StudioPresence.rbxmx
+    to: StudioPresence.rbxmx
+  - from: build/trayTemplate.png
+    to: trayTemplate.png
+  - from: build/trayTemplate@2x.png
+    to: trayTemplate@2x.png
+  - from: build/tray.png
+    to: tray.png
+  - from: build/tray@2x.png
+    to: tray@2x.png
+
+mac:
+  category: public.app-category.developer-tools
+  icon: build/icon.png
+  target:
+    - dmg
+    - zip
+
+win:
+  icon: build/icon.png
+  target:
+    - nsis
+    - portable
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+
+linux:
+  category: Development
+  icon: build/icon.png
+  target:
+    - AppImage
+    - deb
+
+artifactName: ${productName}-${version}-${os}-${arch}.${ext}

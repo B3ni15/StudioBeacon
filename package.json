@@ -1,0 +1,18 @@
+{
+  "name": "studio-presence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "scripts": {
+    "dev": "pnpm --filter @studio/desktop dev",
+    "build": "pnpm build:plugin && pnpm --filter @studio/desktop build",
+    "build:plugin": "pnpm --filter @studio/plugin build",
+    "dist": "pnpm build:plugin && pnpm --filter @studio/desktop dist",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "icons": "node apps/desktop/scripts/make-icons.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
