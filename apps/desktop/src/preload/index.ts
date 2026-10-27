@@ -3,9 +3,9 @@ import type {
   AppSettings,
   AppStatus,
   PluginInstallResult,
-} from "@studio/shared";
+} from "@beacon/shared";
 
-export interface StudioPresenceApi {
+export interface StudioBeaconApi {
   getStatus: () => Promise<AppStatus>;
   onStatus: (listener: (status: AppStatus) => void) => () => void;
   updateSettings: (patch: Partial<AppSettings>) => Promise<AppStatus>;
@@ -21,24 +21,24 @@ export interface StudioPresenceApi {
   quit: () => Promise<boolean>;
 }
 
-const api: StudioPresenceApi = {
-  getStatus: () => ipcRenderer.invoke("app:getStatus"),
+const api: StudioBeaconApi = {
+  getStatus: () => ipcRenderer.invoke("beacon:getStatus"),
   onStatus: (listener) => {
     const handler = (_event: unknown, status: AppStatus) => listener(status);
-    ipcRenderer.on("app:status", handler);
-    return () => ipcRenderer.off("app:status", handler);
+    ipcRenderer.on("beacon:status", handler);
+    return () => ipcRenderer.off("beacon:status", handler);
   },
-  updateSettings: (patch) => ipcRenderer.invoke("app:updateSettings", patch),
-  setDiscordAppId: (value) => ipcRenderer.invoke("app:setDiscordAppId", value),
-  regenerateToken: () => ipcRenderer.invoke("app:regenerateToken"),
-  copy: (text) => ipcRenderer.invoke("app:copy", text),
-  installPlugin: () => ipcRenderer.invoke("app:installPlugin"),
-  savePluginFile: () => ipcRenderer.invoke("app:savePluginFile"),
-  openPluginsFolder: () => ipcRenderer.invoke("app:openPluginsFolder"),
-  openExternal: (url) => ipcRenderer.invoke("app:openExternal", url),
-  openDevPortal: () => ipcRenderer.invoke("app:openDevPortal"),
-  show: () => ipcRenderer.invoke("app:show"),
-  quit: () => ipcRenderer.invoke("app:quit"),
+  updateSettings: (patch) => ipcRenderer.invoke("beacon:updateSettings", patch),
+  setDiscordAppId: (value) => ipcRenderer.invoke("beacon:setDiscordAppId", value),
+  regenerateToken: () => ipcRenderer.invoke("beacon:regenerateToken"),
+  copy: (text) => ipcRenderer.invoke("beacon:copy", text),
+  installPlugin: () => ipcRenderer.invoke("beacon:installPlugin"),
+  savePluginFile: () => ipcRenderer.invoke("beacon:savePluginFile"),
+  openPluginsFolder: () => ipcRenderer.invoke("beacon:openPluginsFolder"),
+  openExternal: (url) => ipcRenderer.invoke("beacon:openExternal", url),
+  openDevPortal: () => ipcRenderer.invoke("beacon:openDevPortal"),
+  show: () => ipcRenderer.invoke("beacon:show"),
+  quit: () => ipcRenderer.invoke("beacon:quit"),
 };
 
 contextBridge.exposeInMainWorld("studioPresence", api);

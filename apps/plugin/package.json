@@ -1,5 +1,5 @@
 {
-  "name": "@studio/plugin",
+  "name": "@beacon/plugin",
   "version": "0.1.0",
   "private": true,
   "scripts": {

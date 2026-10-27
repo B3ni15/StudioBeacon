@@ -18,7 +18,7 @@ import {
   type AppSettings,
   type AppStatus,
   type PluginInstallResult,
-} from "@studio/shared";
+} from "@beacon/shared";
 import { applyAutoStart } from "./autostart";
 import { ConfigStore } from "./config";
 import { IngestServer } from "./ingest";
@@ -86,7 +86,7 @@ function pushStatus(force = false): void {
   lastStatusKey = key;
 
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send("app:status", status);
+    mainWindow.webContents.send("beacon:status", status);
   }
   updateTray(status);
 }
@@ -119,11 +119,11 @@ function updateTray(status: AppStatus): void {
   if (key === lastTrayKey) return;
   lastTrayKey = key;
 
-  tray.setToolTip(`Studio Presence — ${summary}`);
+  tray.setToolTip(`Studio Beacon — ${summary}`);
 
   const template: MenuItemConstructorOptions[] = [
     {
-      label: "Open Studio Presence",
+      label: "Open Studio Beacon",
       click: () => showWindow(),
     },
     {
@@ -153,7 +153,7 @@ function updateTray(status: AppStatus): void {
     },
     { type: "separator" },
     {
-      label: "Quit Studio Presence",
+      label: "Quit Studio Beacon",
       click: () => void quitApp(),
     },
   ];
@@ -188,7 +188,7 @@ function createWindow(): void {
     minHeight: 600,
     show: false,
     backgroundColor: "#0b0d12",
-    title: "Studio Presence",
+    title: "Studio Beacon",
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
     autoHideMenuBar: true,
     webPreferences: {
@@ -301,9 +301,9 @@ function handleActivity(payload: ActivityPayload): void {
 }
 
 function registerIpc(): void {
-  ipcMain.handle("app:getStatus", () => getStatus());
+  ipcMain.handle("beacon:getStatus", () => getStatus());
 
-  ipcMain.handle("app:updateSettings", (_event, patch: Partial<AppSettings>) => {
+  ipcMain.handle("beacon:updateSettings", (_event, patch: Partial<AppSettings>) => {
     if (!patch || typeof patch !== "object") return getStatus();
     const before = store.getSettings();
     const after = store.updateSettings(patch);
@@ -316,7 +316,7 @@ function registerIpc(): void {
     return getStatus();
   });
 
-  ipcMain.handle("app:setDiscordAppId", async (_event, value: unknown) => {
+  ipcMain.handle("beacon:setDiscordAppId", async (_event, value: unknown) => {
     const id = String(value ?? "").trim();
     if (id && !DISCORD_APP_ID_RE.test(id)) {
       throw new Error("A Discord Application ID must be 17–20 digits.");
@@ -327,18 +327,18 @@ function registerIpc(): void {
     return getStatus();
   });
 
-  ipcMain.handle("app:regenerateToken", () => {
+  ipcMain.handle("beacon:regenerateToken", () => {
     store.regenerateToken();
     pushStatus(true);
     return getStatus();
   });
 
-  ipcMain.handle("app:copy", (_event, text: unknown) => {
+  ipcMain.handle("beacon:copy", (_event, text: unknown) => {
     clipboard.writeText(String(text ?? "").slice(0, 4096));
     return true;
   });
 
-  ipcMain.handle("app:installPlugin", async (): Promise<PluginInstallResult> => {
+  ipcMain.handle("beacon:installPlugin", async (): Promise<PluginInstallResult> => {
     let dir = getPluginsDir();
     if (!dir) {
       const result = await dialog.showOpenDialog({
@@ -356,16 +356,16 @@ function registerIpc(): void {
     return installed;
   });
 
-  ipcMain.handle("app:savePluginFile", () => savePluginFile());
+  ipcMain.handle("beacon:savePluginFile", () => savePluginFile());
 
-  ipcMain.handle("app:openPluginsFolder", async () => {
+  ipcMain.handle("beacon:openPluginsFolder", async () => {
     const dir = getPluginsDir();
     if (!dir) return { ok: false, error: "Choose a folder during plugin install." };
     const error = await shell.openPath(dir);
     return error ? { ok: false, error } : { ok: true };
   });
 
-  ipcMain.handle("app:openExternal", async (_event, url: unknown) => {
+  ipcMain.handle("beacon:openExternal", async (_event, url: unknown) => {
     const value = String(url ?? "");
     try {
       const parsed = new URL(value);
@@ -377,26 +377,26 @@ function registerIpc(): void {
     }
   });
 
-  ipcMain.handle("app:openDevPortal", async () => {
+  ipcMain.handle("beacon:openDevPortal", async () => {
     await shell.openExternal("https://discord.com/developers/applications");
     return true;
   });
 
-  ipcMain.handle("app:show", () => {
+  ipcMain.handle("beacon:show", () => {
     showWindow();
     return true;
   });
 
-  ipcMain.handle("app:quit", async () => {
+  ipcMain.handle("beacon:quit", async () => {
     await quitApp();
     return true;
   });
 }
 
 async function bootstrap(): Promise<void> {
-  app.setName("Studio Presence");
+  app.setName("Studio Beacon");
   if (process.platform === "win32") {
-    app.setAppUserModelId("com.studiopresence.app");
+    app.setAppUserModelId("com.studiobeacon.app");
   }
 
   startHidden =
@@ -465,8 +465,8 @@ if (gotLock) {
     .whenReady()
     .then(bootstrap)
     .catch((error) => {
-      console.error("Studio Presence failed to start", error);
+      console.error("Studio Beacon failed to start", error);
       startupError =
-        error instanceof Error ? error.message : "Studio Presence failed to start";
+        error instanceof Error ? error.message : "Studio Beacon failed to start";
     });
 }

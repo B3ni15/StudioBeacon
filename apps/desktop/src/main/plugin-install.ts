@@ -1,9 +1,9 @@
 import { app, dialog } from "electron";
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
-import type { PluginInstallResult } from "@studio/shared";
+import type { PluginInstallResult } from "@beacon/shared";
 
-const PLUGIN_FILE = "StudioPresence.rbxmx";
+const PLUGIN_FILE = "StudioBeacon.rbxmx";
 
 export function bundledPluginPath(): string {
   if (app.isPackaged) {
@@ -64,7 +64,7 @@ export async function savePluginFile(): Promise<PluginInstallResult> {
     };
   }
   const result = await dialog.showSaveDialog({
-    title: "Save the Studio Presence plugin",
+    title: "Save the Studio Beacon plugin",
     defaultPath: path.join(app.getPath("downloads"), PLUGIN_FILE),
     filters: [{ name: "Roblox plugin", extensions: ["rbxmx"] }],
   });

@@ -9,7 +9,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
-import type { AppSettings } from "@studio/shared";
+import type { AppSettings } from "@beacon/shared";
 
 export const DEFAULT_INGEST_PORT = 47831;
 
@@ -17,7 +17,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoStart: true,
   rpcEnabled: true,
   privateMode: false,
-  largeImageKey: process.env.STUDIO_PRESENCE_LARGE_IMAGE_KEY ?? "",
+  largeImageKey: process.env.STUDIO_BEACON_LARGE_IMAGE_KEY ?? "",
   idleSeconds: 300,
 };
 
@@ -35,7 +35,7 @@ function newToken(): string {
 }
 
 function envPort(): number {
-  const raw = Number(process.env.STUDIO_PRESENCE_INGEST_PORT);
+  const raw = Number(process.env.STUDIO_BEACON_INGEST_PORT);
   return Number.isInteger(raw) && raw >= 1024 && raw <= 65535
     ? raw
     : DEFAULT_INGEST_PORT;
@@ -66,7 +66,7 @@ export class ConfigStore {
     return {
       version: 1,
       ingestPort: envPort(),
-      discordAppId: process.env.STUDIO_PRESENCE_DISCORD_APP_ID ?? "",
+      discordAppId: process.env.STUDIO_BEACON_DISCORD_APP_ID ?? "",
       settings: { ...DEFAULT_SETTINGS },
       tokenCipher: null,
       tokenPlain: null,
@@ -158,8 +158,8 @@ export class ConfigStore {
 
   getToken(): string {
     // Dev-only escape hatch so automated tests can post to the local server.
-    if (process.env.STUDIO_PRESENCE_DEV_TOKEN) {
-      return process.env.STUDIO_PRESENCE_DEV_TOKEN;
+    if (process.env.STUDIO_BEACON_DEV_TOKEN) {
+      return process.env.STUDIO_BEACON_DEV_TOKEN;
     }
     if (this.data.tokenCipher) {
       try {

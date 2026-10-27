@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const APP_NAME = "Studio Presence";
+export const APP_NAME = "Studio Beacon";
 export const PLUGIN_VERSION = "1.0.0";
 
 export const playStateSchema = z.enum(["edit", "play", "run", "server", "client"]);

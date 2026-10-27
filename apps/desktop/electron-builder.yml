@@ -1,5 +1,5 @@
-appId: com.studiopresence.app
-productName: Studio Presence
+appId: com.studiobeacon.app
+productName: Studio Beacon
 copyright: Copyright © 2026
 asar: true
 npmRebuild: false
@@ -13,8 +13,8 @@ files:
   - package.json
 
 extraResources:
-  - from: ../plugin/dist/StudioPresence.rbxmx
-    to: StudioPresence.rbxmx
+  - from: ../plugin/dist/StudioBeacon.rbxmx
+    to: StudioBeacon.rbxmx
   - from: build/trayTemplate.png
     to: trayTemplate.png
   - from: build/trayTemplate@2x.png

@@ -8,7 +8,7 @@ import {
 import {
   activityPayloadSchema,
   type ActivityPayload,
-} from "@studio/shared";
+} from "@beacon/shared";
 
 export interface IngestOptions {
   preferredPort: number;
@@ -132,7 +132,7 @@ export class IngestServer {
     if (req.method === "GET" && url.pathname === "/health") {
       json(res, 200, {
         ok: true,
-        app: "studio-presence",
+        app: "studio-beacon",
         version: this.opts.version,
         port: this.port,
       });

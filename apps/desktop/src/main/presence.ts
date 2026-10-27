@@ -5,7 +5,7 @@ import {
   type ActivityPayload,
   type AppSettings,
   type RpcState,
-} from "@studio/shared";
+} from "@beacon/shared";
 
 export interface PresenceOptions {
   getAppId: () => string;

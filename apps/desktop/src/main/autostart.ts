@@ -11,7 +11,7 @@ export interface AutoStartResult {
 function linuxAutostartFile(): string {
   const configHome =
     process.env.XDG_CONFIG_HOME ?? path.join(os.homedir(), ".config");
-  return path.join(configHome, "autostart", "studio-presence.desktop");
+  return path.join(configHome, "autostart", "studio-beacon.desktop");
 }
 
 function escapeExec(value: string): string {
@@ -37,7 +37,7 @@ export function applyAutoStart(enabled: boolean): AutoStartResult {
         [
           "[Desktop Entry]",
           "Type=Application",
-          "Name=Studio Presence",
+          "Name=Studio Beacon",
           "Comment=Show Roblox Studio activity on Discord",
           `Exec="${escapeExec(process.execPath)}" --hidden`,
           "Terminal=false",
