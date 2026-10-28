@@ -51,7 +51,6 @@ export function applyAutoStart(enabled: boolean): AutoStartResult {
 
     app.setLoginItemSettings({
       openAtLogin: enabled,
-      openAsHidden: true,
       args: ["--hidden"],
     });
     return { ok: true };

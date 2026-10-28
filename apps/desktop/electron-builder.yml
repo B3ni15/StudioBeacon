@@ -1,6 +1,6 @@
 appId: com.studiobeacon.app
 productName: Studio Beacon
-copyright: Copyright © 2026
+copyright: Copyright © 2026 Studio Beacon contributors
 asar: true
 npmRebuild: false
 
@@ -24,18 +24,36 @@ extraResources:
   - from: build/tray@2x.png
     to: tray@2x.png
 
+# GitHub Releases feed used by electron-updater.
+publish:
+  provider: github
+  owner: B3ni15
+  repo: StudioBeacon
+
 mac:
   category: public.app-category.developer-tools
   icon: build/icon.png
+  hardenedRuntime: true
   target:
-    - dmg
-    - zip
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+    - target: zip
+      arch:
+        - arm64
+        - x64
 
 win:
   icon: build/icon.png
   target:
-    - nsis
-    - portable
+    - target: nsis
+      arch:
+        - x64
+        - arm64
+    - target: portable
+      arch:
+        - x64
 
 nsis:
   oneClick: false
@@ -49,4 +67,4 @@ linux:
     - AppImage
     - deb
 
-artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+artifactName: studio-beacon-${version}-${os}-${arch}.${ext}

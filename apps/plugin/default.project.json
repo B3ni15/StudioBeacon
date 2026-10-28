@@ -1,0 +1,9 @@
+{
+  "name": "StudioBeacon",
+  "tree": {
+    "$className": "Folder",
+    "StudioBeacon": {
+      "$path": "src/StudioBeacon.server.lua"
+    }
+  }
+}

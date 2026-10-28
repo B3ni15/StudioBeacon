@@ -20,6 +20,19 @@ function clampText(value: string, fallback = "Roblox Studio"): string {
   return text;
 }
 
+function formatCollaborators(
+  collaborators: ActivityPayload["collaborators"],
+): string {
+  const names = collaborators
+    .map((person) => person.name.replace(/\s+/g, " ").trim())
+    .filter((name) => name.length > 0);
+  if (names.length === 0) return "";
+
+  const shown = names.slice(0, 2);
+  const rest = names.length - shown.length;
+  return rest > 0 ? `${shown.join(", ")} +${rest}` : shown.join(", ");
+}
+
 function friendlyError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   if (
@@ -132,15 +145,17 @@ export class PresenceManager {
     if (this.idleTimer) clearTimeout(this.idleTimer);
     if (this.clearTimer) clearTimeout(this.clearTimer);
 
+    const idleMs = this.opts.getSettings().idleSeconds * 1000;
+
     this.idleTimer = setTimeout(() => {
       if (!this.lastPayload) return;
       this.idleOverride = true;
       this.queuePush(true);
-    }, 120_000);
+    }, idleMs);
 
     this.clearTimer = setTimeout(() => {
       void this.clearPresence();
-    }, 10 * 60_000);
+    }, 3 * 60_000);
   }
 
   private async clearPresence(): Promise<void> {
@@ -165,6 +180,10 @@ export class PresenceManager {
     const idle = payload.idle || this.idleOverride;
     const project = displayProjectName(payload.project);
     const playLabel = PLAY_LABELS[payload.play.state] ?? "Editing";
+    const collaborators = privateMode || idle
+      ? ""
+      : formatCollaborators(payload.collaborators ?? []);
+    const withText = collaborators ? `with ${collaborators}` : "";
 
     let details = project;
     let state = playLabel;
@@ -176,10 +195,13 @@ export class PresenceManager {
       details = "Idle";
       state = project;
     } else if (payload.script) {
+      details = withText ? `${project} · ${withText}` : project;
       state = `${payload.script.name || "Script"}:${payload.script.line}`;
       if (payload.play.state !== "edit") {
         state += ` · ${playLabel}`;
       }
+    } else if (withText) {
+      state = `${playLabel} · ${withText}`;
     }
 
     const activity: SetActivity = {

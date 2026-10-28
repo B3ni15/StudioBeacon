@@ -1,4 +1,4 @@
-import { app, safeStorage } from "electron";
+import { app } from "electron";
 import { randomBytes } from "node:crypto";
 import {
   chmodSync,
@@ -9,7 +9,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
-import type { AppSettings } from "@beacon/shared";
+import { DEFAULT_DISCORD_APP_ID, type AppSettings } from "@beacon/shared";
 
 export const DEFAULT_INGEST_PORT = 47831;
 
@@ -22,12 +22,11 @@ const DEFAULT_SETTINGS: AppSettings = {
 };
 
 interface StoredConfig {
-  version: 1;
+  version: 3;
   ingestPort: number;
   discordAppId: string;
   settings: AppSettings;
-  tokenCipher: string | null;
-  tokenPlain: string | null;
+  token: string;
 }
 
 function newToken(): string {
@@ -44,53 +43,55 @@ function envPort(): number {
 export class ConfigStore {
   private readonly file: string;
   private data: StoredConfig;
-  readonly encryptionAvailable: boolean;
 
   constructor() {
     this.file = path.join(app.getPath("userData"), "config.json");
-    this.encryptionAvailable = this.checkEncryption();
     this.data = this.read();
-    this.ensureToken();
+    if (!this.data.token) this.data.token = newToken();
+    // Always persist on boot so the token is stable across restarts.
     this.save();
-  }
-
-  private checkEncryption(): boolean {
-    try {
-      return safeStorage.isEncryptionAvailable();
-    } catch {
-      return false;
-    }
   }
 
   private defaults(): StoredConfig {
     return {
-      version: 1,
+      version: 3,
       ingestPort: envPort(),
-      discordAppId: process.env.STUDIO_BEACON_DISCORD_APP_ID ?? "",
+      discordAppId:
+        process.env.STUDIO_BEACON_DISCORD_APP_ID ?? DEFAULT_DISCORD_APP_ID,
       settings: { ...DEFAULT_SETTINGS },
-      tokenCipher: null,
-      tokenPlain: null,
+      token: newToken(),
     };
   }
 
   private read(): StoredConfig {
     const defaults = this.defaults();
     if (!existsSync(this.file)) return defaults;
+
     try {
-      const raw = JSON.parse(readFileSync(this.file, "utf8")) as Partial<StoredConfig>;
-      const settings = { ...defaults.settings, ...(raw.settings ?? {}) };
+      const raw = JSON.parse(readFileSync(this.file, "utf8")) as Record<
+        string,
+        unknown
+      >;
+      const storedSettings = (raw.settings ?? {}) as Partial<AppSettings>;
+      const settings = { ...defaults.settings, ...storedSettings };
+
+      const version = typeof raw.version === "number" ? raw.version : 1;
+      const storedAppId =
+        typeof raw.discordAppId === "string" ? raw.discordAppId.trim() : "";
+
       return {
-        version: 1,
+        version: 3,
         ingestPort:
           Number.isInteger(raw.ingestPort) &&
-          (raw.ingestPort ?? 0) >= 1024 &&
-          (raw.ingestPort ?? 0) <= 65535
+          (raw.ingestPort as number) >= 1024 &&
+          (raw.ingestPort as number) <= 65535
             ? (raw.ingestPort as number)
             : defaults.ingestPort,
+        // Before v3 the app had no default ID, so an empty value there means
+        // "not configured yet" and gets the shared application. From v3 on an
+        // empty string is an intentional choice (presence disabled).
         discordAppId:
-          typeof raw.discordAppId === "string"
-            ? raw.discordAppId
-            : defaults.discordAppId,
+          storedAppId || (version >= 3 ? "" : defaults.discordAppId),
         settings: {
           autoStart:
             typeof settings.autoStart === "boolean"
@@ -106,18 +107,17 @@ export class ConfigStore {
               : defaults.settings.privateMode,
           largeImageKey:
             typeof settings.largeImageKey === "string"
-              ? settings.largeImageKey
+              ? settings.largeImageKey.slice(0, 64) ||
+                (version >= 3 ? "" : defaults.settings.largeImageKey)
               : defaults.settings.largeImageKey,
           idleSeconds:
             Number.isInteger(settings.idleSeconds) &&
-            settings.idleSeconds >= 30 &&
-            settings.idleSeconds <= 3600
-              ? settings.idleSeconds
+            (settings.idleSeconds as number) >= 30 &&
+            (settings.idleSeconds as number) <= 3600
+              ? (settings.idleSeconds as number)
               : defaults.settings.idleSeconds,
         },
-        tokenCipher:
-          typeof raw.tokenCipher === "string" ? raw.tokenCipher : null,
-        tokenPlain: typeof raw.tokenPlain === "string" ? raw.tokenPlain : null,
+        token: typeof raw.token === "string" ? raw.token : "",
       };
     } catch {
       return defaults;
@@ -137,47 +137,18 @@ export class ConfigStore {
     }
   }
 
-  private ensureToken(): void {
-    if (this.data.tokenCipher || this.data.tokenPlain) return;
-    this.writeToken(newToken());
-  }
-
-  private writeToken(token: string): void {
-    if (this.encryptionAvailable) {
-      try {
-        this.data.tokenCipher = safeStorage.encryptString(token).toString("base64");
-        this.data.tokenPlain = null;
-        return;
-      } catch {
-        // Fall through to plain storage.
-      }
-    }
-    this.data.tokenPlain = token;
-    this.data.tokenCipher = null;
-  }
-
   getToken(): string {
     // Dev-only escape hatch so automated tests can post to the local server.
     if (process.env.STUDIO_BEACON_DEV_TOKEN) {
       return process.env.STUDIO_BEACON_DEV_TOKEN;
     }
-    if (this.data.tokenCipher) {
-      try {
-        return safeStorage.decryptString(
-          Buffer.from(this.data.tokenCipher, "base64"),
-        );
-      } catch {
-        // Fall back to a plain token if decryption fails.
-      }
-    }
-    return this.data.tokenPlain ?? "";
+    return this.data.token;
   }
 
   regenerateToken(): string {
-    const token = newToken();
-    this.writeToken(token);
+    this.data.token = newToken();
     this.save();
-    return token;
+    return this.data.token;
   }
 
   getSettings(): AppSettings {

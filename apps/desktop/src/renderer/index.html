@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Studio Beacon</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="drag-region" aria-hidden="true"></div>
+
+    <svg class="sprite" aria-hidden="true" focusable="false">
+      <symbol id="i-discord" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          stroke="none"
+          d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.6 12.6 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.028C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.2 14.2 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.011c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .079.01c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.363 1.225 1.993a.076.076 0 0 0 .084.029 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.029ZM8.02 15.331c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.095 2.157 2.419 0 1.333-.956 2.419-2.157 2.419Zm7.975 0c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.095 2.157 2.419 0 1.333-.946 2.419-2.157 2.419Z"
+        />
+      </symbol>
+      <symbol id="i-code" viewBox="0 0 24 24">
+        <polyline points="16 18 22 12 16 6" />
+        <polyline points="8 6 2 12 8 18" />
+      </symbol>
+      <symbol id="i-plug" viewBox="0 0 24 24">
+        <path d="M9 2v6M15 2v6M6 8h12v3a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8Z" />
+        <path d="M12 17v5" />
+      </symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.56 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z"
+        />
+      </symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24">
+        <rect x="9" y="9" width="12" height="12" rx="2" />
+        <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24">
+        <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+        <polyline points="21 3 21 9 15 9" />
+      </symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24">
+        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 3v12" />
+        <polyline points="7 10 12 15 17 10" />
+        <path d="M5 21h14" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12" />
+      </symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24">
+        <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+        <path d="M12 9v4M12 17h.01" />
+      </symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <polyline points="12 7 12 12 15 14" />
+      </symbol>
+      <symbol id="i-external" viewBox="0 0 24 24">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </symbol>
+      <symbol id="i-power" viewBox="0 0 24 24">
+        <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+        <line x1="12" y1="2" x2="12" y2="12" />
+      </symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24">
+        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
+        <circle cx="12" cy="12" r="3" />
+      </symbol>
+      <symbol id="i-eye-off" viewBox="0 0 24 24">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+        <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+        <line x1="1" y1="1" x2="23" y2="23" />
+      </symbol>
+      <symbol id="i-key" viewBox="0 0 24 24">
+        <circle cx="7.5" cy="15.5" r="4.5" />
+        <path d="M10.7 12.3 21 2" />
+        <path d="M16 7l3 3" />
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+      </symbol>
+      <symbol id="i-arrow-up" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <polyline points="8 12 12 8 16 12" />
+        <line x1="12" y1="16" x2="12" y2="8" />
+      </symbol>
+      <symbol id="i-play" viewBox="0 0 24 24">
+        <polygon points="6 3 20 12 6 21 6 3" />
+      </symbol>
+      <symbol id="i-monitor" viewBox="0 0 24 24">
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <line x1="8" y1="21" x2="16" y2="21" />
+        <line x1="12" y1="17" x2="12" y2="21" />
+      </symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+      </symbol>
+    </svg>
+
+    <main class="app">
+      <header class="hero">
+        <div class="hero__brand">
+          <div class="logo">
+            <img src="assets/roblox-studio.png" alt="Roblox Studio" />
+            <span class="logo__badge"></span>
+          </div>
+          <div>
+            <h1>Studio Beacon</h1>
+            <p class="hero__tagline">Your Roblox Studio session, live on Discord.</p>
+          </div>
+        </div>
+        <div class="pill pill--waiting" id="status-pill">
+          <span class="dot"></span>
+          <span id="status-pill-text">Starting…</span>
+        </div>
+      </header>
+
+      <section class="grid">
+        <article class="card card--now">
+          <div class="card__head">
+            <div class="card__title">
+              <svg class="icon"><use href="#i-monitor" /></svg>
+              <span>Now showing</span>
+            </div>
+            <div class="session">
+              <svg class="icon icon--sm"><use href="#i-clock" /></svg>
+              <span id="session-timer">—</span>
+            </div>
+          </div>
+
+          <div class="now">
+            <h2 class="now__project" id="now-project">Waiting for Roblox Studio</h2>
+            <p class="now__detail" id="now-detail">
+              Install the plugin below, then open Studio — your session shows up here.
+            </p>
+            <div class="chips">
+              <span class="chip" id="chip-play">
+                <svg class="icon icon--sm"><use href="#i-code" /></svg>
+                <span id="chip-play-text">Idle</span>
+              </span>
+              <span class="chip" id="chip-rpc">
+                <svg class="icon icon--sm"><use href="#i-discord" /></svg>
+                <span id="chip-rpc-text">Discord offline</span>
+              </span>
+              <span class="chip" id="chip-plugin">
+                <svg class="icon icon--sm"><use href="#i-plug" /></svg>
+                <span id="chip-plugin-text">No plugin signal</span>
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card__head">
+            <div class="card__title">
+              <svg class="icon"><use href="#i-discord" /></svg>
+              <span>Discord</span>
+            </div>
+            <button class="btn btn--tiny btn--ghost" id="open-portal" type="button">
+              <svg class="icon icon--sm"><use href="#i-external" /></svg>
+              Developer Portal
+            </button>
+          </div>
+
+          <label class="label" for="discord-id">Application ID</label>
+          <div class="row">
+            <input
+              class="input input--mono"
+              id="discord-id"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="123456789012345678"
+              maxlength="20"
+            />
+            <button class="btn btn--primary" id="save-discord" type="button">Save</button>
+          </div>
+          <p class="hint">
+            Pre-filled with the Studio Beacon Discord application, so it works out of the box.
+            Paste your own ID if you want your own app name and art. No client secret, no login.
+          </p>
+          <button class="link-btn" id="use-default-discord" type="button">
+            <svg class="icon icon--sm"><use href="#i-refresh" /></svg>
+            Use the default app ID
+          </button>
+
+          <div class="status-line">
+            <span class="dot" id="rpc-dot"></span>
+            <span id="rpc-text">Discord is not connected</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <label class="label" for="large-image">Large image asset key <span class="label__opt">optional</span></label>
+          <input
+            class="input input--mono"
+            id="large-image"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="studio"
+            maxlength="64"
+          />
+          <p class="hint">Optional: a Rich Presence art asset key uploaded to your own Discord application.</p>
+
+          <div class="setting">
+            <div>
+              <p class="setting__name">Private mode</p>
+              <p class="setting__desc">Show “Private mode” instead of your place and script.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-private" />
+              <span></span>
+            </label>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card__head">
+            <div class="card__title">
+              <svg class="icon"><use href="#i-plug" /></svg>
+              <span>Studio plugin</span>
+            </div>
+            <span class="chip chip--sm" id="plugin-state">
+              <span id="plugin-state-text">Not installed</span>
+            </span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn--primary" id="install-plugin" type="button">
+              <svg class="icon icon--sm"><use href="#i-download" /></svg>
+              <span id="install-plugin-text">Install plugin</span>
+            </button>
+            <button class="btn" id="save-plugin" type="button">
+              <svg class="icon icon--sm"><use href="#i-copy" /></svg>
+              Save .rbxmx
+            </button>
+            <button class="btn btn--icon" id="open-plugins" type="button" title="Open the Plugins folder">
+              <svg class="icon icon--sm"><use href="#i-folder" /></svg>
+            </button>
+          </div>
+          <p class="hint" id="plugin-path">The plugin is installed into your local Roblox Plugins folder.</p>
+
+          <div class="divider"></div>
+
+          <label class="label" for="ingest-url">Local server</label>
+          <div class="row">
+            <input class="input input--mono" id="ingest-url" type="text" readonly />
+            <button class="btn btn--icon" id="copy-url" type="button" title="Copy the local server URL">
+              <svg class="icon icon--sm"><use href="#i-copy" /></svg>
+            </button>
+          </div>
+
+          <label class="label" for="token-value">Plugin token</label>
+          <div class="row">
+            <input class="input input--mono" id="token-value" type="text" readonly />
+            <button class="btn btn--icon" id="toggle-token" type="button" title="Show or hide the token">
+              <svg class="icon icon--sm"><use href="#i-eye" /></svg>
+            </button>
+            <button class="btn btn--icon" id="copy-token" type="button" title="Copy the token">
+              <svg class="icon icon--sm"><use href="#i-copy" /></svg>
+            </button>
+          </div>
+          <button class="link-btn" id="regen-token" type="button">
+            <svg class="icon icon--sm"><use href="#i-refresh" /></svg>
+            Regenerate token
+          </button>
+        </article>
+
+        <article class="card">
+          <div class="card__head">
+            <div class="card__title">
+              <svg class="icon"><use href="#i-settings" /></svg>
+              <span>Preferences</span>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div>
+              <p class="setting__name">Start at login</p>
+              <p class="setting__desc">Launch hidden in the tray when you sign in.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-autostart" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="setting">
+            <div>
+              <p class="setting__name">Rich Presence</p>
+              <p class="setting__desc">Send activity to the Discord desktop app.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-rpc" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="setting">
+            <div>
+              <p class="setting__name">Idle after</p>
+              <p class="setting__desc">Hide the script name after this much inactivity.</p>
+            </div>
+            <select class="select" id="idle-select">
+              <option value="120">2 minutes</option>
+              <option value="300">5 minutes</option>
+              <option value="600">10 minutes</option>
+              <option value="1800">30 minutes</option>
+            </select>
+          </div>
+
+          <div class="setting setting--last">
+            <div>
+              <p class="setting__name">Runs locally</p>
+              <p class="setting__desc">No account, no server, no telemetry.</p>
+            </div>
+            <svg class="icon icon--muted"><use href="#i-shield" /></svg>
+          </div>
+        </article>
+
+        <article class="card card--update">
+          <div class="card__head">
+            <div class="card__title">
+              <svg class="icon"><use href="#i-arrow-up" /></svg>
+              <span>Updates</span>
+            </div>
+            <span class="version" id="app-version">v0.0.0</span>
+          </div>
+
+          <p class="update__text" id="update-text">Not checked yet.</p>
+
+          <div class="progress" id="update-progress" hidden>
+            <div class="progress__fill" id="update-fill"></div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn" id="update-action" type="button">
+              <svg class="icon icon--sm"><use href="#i-refresh" /></svg>
+              <span id="update-action-text">Check for updates</span>
+            </button>
+            <button class="link-btn" id="open-releases" type="button">
+              <svg class="icon icon--sm"><use href="#i-external" /></svg>
+              Releases
+            </button>
+          </div>
+
+          <p class="hint">Updates come from GitHub Releases and install in place.</p>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <span class="footer__note">
+          <svg class="icon icon--sm"><use href="#i-bolt" /></svg>
+          Local only · <span id="footer-platform">desktop</span>
+        </span>
+        <button class="btn btn--danger btn--ghost" id="quit-app" type="button">
+          <svg class="icon icon--sm"><use href="#i-power" /></svg>
+          Quit
+        </button>
+      </footer>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

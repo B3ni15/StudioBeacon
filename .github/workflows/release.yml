@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (without the leading v), e.g. 0.2.0"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      # electron-builder creates/updates the same GitHub release from each job,
+      # so publishing one platform at a time avoids races.
+      max-parallel: 1
+      matrix:
+        include:
+          - os: macos-latest
+            build: --mac
+          - os: windows-latest
+            build: --win
+          - os: ubuntu-latest
+            build: --linux
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Signing is optional. Without a certificate the app still builds and
+      # updates on Windows/Linux; macOS auto-update requires a signature.
+      CSC_LINK: ${{ secrets.MAC_CERT_P12 }}
+      CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+      CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CERT_P12 == '' && 'false' || 'true' }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "Invalid version: $VERSION" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          node -e '
+            const fs = require("fs");
+            const file = "apps/desktop/package.json";
+            const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+            pkg.version = process.argv[1];
+            fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
+          ' "$VERSION"
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build plugin and desktop app
+        run: pnpm build
+
+      - name: Package and publish
+        shell: bash
+        run: pnpm --filter @beacon/desktop exec electron-builder ${{ matrix.build }} --publish always
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ matrix.os }}
+          path: |
+            apps/desktop/release/*.log
+            apps/desktop/release/*.yml
+          if-no-files-found: ignore
+          retention-days: 7

@@ -12,6 +12,7 @@ import {
 } from "electron";
 import path from "node:path";
 import {
+  DEFAULT_DISCORD_APP_ID,
   DISCORD_APP_ID_RE,
   displayProjectName,
   type ActivityPayload,
@@ -24,12 +25,14 @@ import { ConfigStore } from "./config";
 import { IngestServer } from "./ingest";
 import { installPlugin, installedPluginPath, getPluginsDir, savePluginFile } from "./plugin-install";
 import { PresenceManager } from "./presence";
+import { UpdateManager } from "./updater";
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let store: ConfigStore;
 let ingest: IngestServer;
 let presence: PresenceManager;
+let updater: UpdateManager;
 
 let lastActivity: ActivityPayload | null = null;
 let lastActivityAt: number | null = null;
@@ -48,7 +51,7 @@ if (!gotLock) {
 function getStatus(): AppStatus {
   const settings = store.getSettings();
   const pluginConnected =
-    lastActivityAt !== null && Date.now() - lastActivityAt < 15_000;
+    lastActivityAt !== null && Date.now() - lastActivityAt < 25_000;
   const phase = startupError
     ? "paused"
     : !store.getDiscordAppId()
@@ -64,12 +67,14 @@ function getStatus(): AppStatus {
     ingestUrl: ingest.getPort() > 0 ? ingest.getUrl() : "",
     pluginToken: store.getToken(),
     discordAppId: store.getDiscordAppId(),
+    defaultDiscordAppId: DEFAULT_DISCORD_APP_ID,
     activity: lastActivity,
     lastActivityAt,
     sessionStartedAt,
     pluginConnected,
     rpc: presence.getState(),
     settings,
+    update: updater.getState(),
     pluginInstalled: installed !== null,
     pluginPath: installed,
     pluginsDir: getPluginsDir(),
@@ -92,7 +97,7 @@ function pushStatus(force = false): void {
 }
 
 function traySummary(status: AppStatus): string {
-  if (status.phase === "setup") return "Set your Discord Application ID";
+  if (status.phase === "setup") return "Waiting for Roblox Studio";
   if (!status.pluginConnected || !status.activity) {
     return "Waiting for Roblox Studio";
   }
@@ -171,7 +176,7 @@ async function installFromMenu(): Promise<void> {
     if (result.canceled || !result.filePaths[0]) return;
     dir = result.filePaths[0];
   }
-  const installed = installPlugin(dir);
+  const installed = installPlugin(dir, store.getToken(), ingest.getUrl());
   if (!installed.ok) {
     startupError = installed.error ?? "Could not install the plugin";
   }
@@ -266,6 +271,11 @@ async function quitApp(): Promise<void> {
   if (quitting) return;
   quitting = true;
   try {
+    updater.stop();
+  } catch {
+    // Best effort.
+  }
+  try {
     await presence.stop();
   } catch {
     // Best effort.
@@ -350,13 +360,19 @@ function registerIpc(): void {
       }
       dir = result.filePaths[0];
     }
-    const installed = installPlugin(dir);
+    const installed = installPlugin(dir, store.getToken(), ingest.getUrl());
     if (!installed.ok) startupError = installed.error ?? "Could not install the plugin";
     pushStatus(true);
     return installed;
   });
 
-  ipcMain.handle("beacon:savePluginFile", () => savePluginFile());
+  ipcMain.handle("beacon:savePluginFile", () =>
+    savePluginFile(store.getToken(), ingest.getUrl()),
+  );
+
+  ipcMain.handle("beacon:checkForUpdates", () => updater.check());
+
+  ipcMain.handle("beacon:installUpdate", () => updater.install());
 
   ipcMain.handle("beacon:openPluginsFolder", async () => {
     const dir = getPluginsDir();
@@ -404,6 +420,8 @@ async function bootstrap(): Promise<void> {
     app.getLoginItemSettings().wasOpenedAtLogin;
 
   store = new ConfigStore();
+  updater = new UpdateManager(() => pushStatus());
+
   presence = new PresenceManager({
     getAppId: () => store.getDiscordAppId(),
     getSettings: () => store.getSettings(),
@@ -414,6 +432,7 @@ async function bootstrap(): Promise<void> {
     preferredPort: store.getIngestPort(),
     version: app.getVersion(),
     getToken: () => store.getToken(),
+    getIdleSeconds: () => store.getSettings().idleSeconds,
     onActivity: handleActivity,
     onPortChange: (port) => {
       if (port !== store.getIngestPort()) store.setIngestPort(port);
@@ -440,6 +459,7 @@ async function bootstrap(): Promise<void> {
   createWindow();
   createTray();
   await presence.start();
+  updater.start();
   pushStatus(true);
 
   setInterval(() => pushStatus(), 5_000);

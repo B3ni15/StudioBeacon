@@ -44,5 +44,8 @@ await build({
 await cp(path.join(root, "src/renderer"), path.join(out, "renderer"), {
   recursive: true,
 });
+await cp(path.join(root, "assets"), path.join(out, "renderer", "assets"), {
+  recursive: true,
+});
 
 console.log("desktop build complete");

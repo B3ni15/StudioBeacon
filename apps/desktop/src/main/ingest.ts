@@ -14,6 +14,7 @@ export interface IngestOptions {
   preferredPort: number;
   version: string;
   getToken: () => string;
+  getIdleSeconds: () => number;
   onActivity: (payload: ActivityPayload) => void;
   onPortChange: (port: number) => void;
   onError: (message: string) => void;
@@ -196,6 +197,6 @@ export class IngestServer {
       return;
     }
 
-    json(res, 200, { ok: true });
+    json(res, 200, { ok: true, idleSeconds: this.opts.getIdleSeconds() });
   }
 }

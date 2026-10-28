@@ -3,6 +3,7 @@ import type {
   AppSettings,
   AppStatus,
   PluginInstallResult,
+  UpdateStatus,
 } from "@beacon/shared";
 
 export interface StudioBeaconApi {
@@ -17,6 +18,8 @@ export interface StudioBeaconApi {
   openPluginsFolder: () => Promise<{ ok: boolean; error?: string }>;
   openExternal: (url: string) => Promise<boolean>;
   openDevPortal: () => Promise<boolean>;
+  checkForUpdates: () => Promise<UpdateStatus>;
+  installUpdate: () => Promise<boolean>;
   show: () => Promise<boolean>;
   quit: () => Promise<boolean>;
 }
@@ -37,6 +40,8 @@ const api: StudioBeaconApi = {
   openPluginsFolder: () => ipcRenderer.invoke("beacon:openPluginsFolder"),
   openExternal: (url) => ipcRenderer.invoke("beacon:openExternal", url),
   openDevPortal: () => ipcRenderer.invoke("beacon:openDevPortal"),
+  checkForUpdates: () => ipcRenderer.invoke("beacon:checkForUpdates"),
+  installUpdate: () => ipcRenderer.invoke("beacon:installUpdate"),
   show: () => ipcRenderer.invoke("beacon:show"),
   quit: () => ipcRenderer.invoke("beacon:quit"),
 };

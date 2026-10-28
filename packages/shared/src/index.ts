@@ -52,6 +52,16 @@ export const activityPayloadSchema = z.object({
     })
     .nullable()
     .optional(),
+  /** Other people in the Team Create session (local user excluded). */
+  collaborators: z
+    .array(
+      z.object({
+        name: shortText(64),
+        username: shortText(64).optional(),
+      }),
+    )
+    .max(16)
+    .default([]),
   play: z
     .object({
       state: playStateSchema.default("edit"),
@@ -83,22 +93,43 @@ export interface RpcState {
 
 export type AppPhase = "setup" | "waiting" | "live" | "paused";
 
+export type UpdateState =
+  | "disabled"
+  | "idle"
+  | "checking"
+  | "available"
+  | "downloading"
+  | "downloaded"
+  | "up-to-date"
+  | "error";
+
+export interface UpdateStatus {
+  state: UpdateState;
+  /** Version of the update that is available / downloaded. */
+  version: string | null;
+  percent: number;
+  error: string | null;
+  checkedAt: number | null;
+}
+
 export interface AppStatus {
   phase: AppPhase;
   version: string;
   ingestUrl: string;
   pluginToken: string;
   discordAppId: string;
+  defaultDiscordAppId: string;
   activity: ActivityPayload | null;
   lastActivityAt: number | null;
   sessionStartedAt: number | null;
   pluginConnected: boolean;
   rpc: RpcState;
   settings: AppSettings;
+  update: UpdateStatus;
   pluginInstalled: boolean;
   pluginPath: string | null;
   pluginsDir: string | null;
-  platform: NodeJS.Platform;
+  platform: string;
   error: string | null;
 }
 
@@ -109,6 +140,13 @@ export interface PluginInstallResult {
 }
 
 export const DISCORD_APP_ID_RE = /^\d{17,20}$/;
+
+/**
+ * Studio Beacon's own Discord application, built in so the app works out of
+ * the box without asking every user to register an application. Users can
+ * still paste their own Application ID in the settings.
+ */
+export const DEFAULT_DISCORD_APP_ID = "1564794087918403705";
 
 export function displayProjectName(project: ActivityPayload["project"]): string {
   const name = project.name.trim();
