@@ -3,3 +3,7 @@ packages:
   - "packages/*"
 minimumReleaseAgeExclude:
   - electron@45.1.0
+onlyBuiltDependencies:
+  - electron
+  - electron-winstaller
+  - esbuild
